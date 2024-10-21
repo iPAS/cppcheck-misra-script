@@ -10,4 +10,4 @@ get_abs_filename() {
 
 script_folder=$(get_abs_filename "$(dirname $(readlink -f $0))")
 
-"${script_folder}"/misra_check/check_misra.sh --source $*
+"${script_folder}"/misra_check/check_misra.sh --source $* --quiet --clean

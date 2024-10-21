@@ -16,6 +16,7 @@ out_folder=""                               # -o, --out
 cppcheck_path="$script_folder/../cppcheck"  # -c, --cppcheck
 quiet=0                                     # -q, --quiet
 output_xml=0                                # -x, --xml
+clean_old_tempdir=0                         # --clean
 
 function parse_command_line() {
    while [ $# -gt 0 ] ; do
@@ -25,6 +26,7 @@ function parse_command_line() {
       -c | --cppcheck) cppcheck_path="$2" ;;
       -q | --quiet) quiet=1 ;;
       -x | --xml) output_xml=1 ;;
+      --clean) clean_old_tempdir=1 ;;
       -*)
         echo "Unknown option: " $1
         exit 1
@@ -42,7 +44,10 @@ parse_command_line "$@"
 #   2.1. E.g. exclusion folders
 source_folder=$(get_abs_filename "$source_folder")
 
-[[ -z "${out_folder}" ]] && out_folder=$(mktemp -d misra_check-out.XXX)
+out_folder_prefix=misra_check-out
+[[ $clean_old_tempdir -gt 0 ]] && trash ${out_folder_prefix}.*
+
+[[ -z "${out_folder}" ]] && out_folder=$(mktemp -d ${out_folder_prefix}.XXX)
 [[ ! -d "${out_folder}" ]] && echo "Cannot access the output directory: ${out_folder}" && exit 255
 
 cppcheck_bin="${cppcheck_path}/cppcheck"
