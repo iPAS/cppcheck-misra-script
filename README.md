@@ -20,6 +20,17 @@ Bash script helper to Cppcheck on C and C++ code, with MISRA guidelines
     ```
 
 
+## Testing
+
+Just run:
+```bash
+$ ./misra_check.sh cppcheck/samples  # For C and C++
+...
+$ ./misra_check.sh examples  # For C++
+...
+```
+
+
 ## References
 
 * Adopt MISRA checking script from [Speeduino](https://github.com/speeduino/speeduino)
