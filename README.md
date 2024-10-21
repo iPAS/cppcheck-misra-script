@@ -23,3 +23,4 @@ Bash script helper to Cppcheck on C and C++ code, with MISRA guidelines
 ## References
 
 * Adopt MISRA checking script from [Speeduino](https://github.com/speeduino/speeduino)
+* Adopt [MISRA-Example-Suite](https://github.com/jubnzv/MISRA-Example-Suite) for testing, as __examples__

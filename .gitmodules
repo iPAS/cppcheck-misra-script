@@ -1,3 +1,6 @@
 [submodule "cppcheck"]
 	path = cppcheck
 	url = git@github.com:danmar/cppcheck.git
+[submodule "examples"]
+	path = examples
+	url = git@github.com:jubnzv/MISRA-Example-Suite.git
