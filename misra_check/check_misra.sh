@@ -53,6 +53,7 @@ let num_cores--
 num_cores=$(nproc)
 
 mkdir -p "$out_folder"
+echo '{"script": "misra.py","args": ["--rule-texts='"$script_folder"'/misra_2012_text.txt"]}' > "$out_folder/misra.json"
 
 cppcheck_parameters=( --inline-suppr
                       # --language=c++
@@ -61,7 +62,8 @@ cppcheck_parameters=( --inline-suppr
                       --enable=performance
                       --enable=portability
                       --enable=style
-                      --addon="$script_folder/misra.json"
+                      # --addon="$script_folder/misra.json"
+                      --addon="$out_folder/misra.json"
                       --suppressions-list="$script_folder/suppressions.txt"
                       --suppress=unusedFunction:*
                       --suppress=missingInclude:*
@@ -73,7 +75,7 @@ cppcheck_parameters=( --inline-suppr
                       -j "$num_cores"
 
                       # All violations from included libraries (*src* folders) are ignored
-                      --suppress="*:$source_folder/*"
+                      # --suppress="*:$source_folder/*"
 
                       # Don't parse the /src folder
                       # -i "$source_folder"
@@ -107,7 +109,9 @@ if [ $quiet -eq 0 ]; then
 fi
 echo $error_count MISRA violations
 echo $error_count > "$out_folder/error_count.txt"
-echo "Output in ${out_folder}"
+
+echo "All output files are in $out_folder"
+echo "Result: $cppcheck_out_file"
 # ls "${out_folder}"
 
 exit 0
