@@ -5,7 +5,7 @@
 
 get_abs_filename() {
   # $1 : relative filename
-  echo "$(cd "$(dirname "$1")" && pwd)/$(basename "$1")"
+  echo $(cd `dirname "$1"` && pwd)/$(basename "$1")
 }
 
 script_folder=$(get_abs_filename "$(dirname $(readlink -f $0))")
@@ -31,9 +31,10 @@ function parse_command_line() {
         # 1. CPPCheck (or the shell) expands globs to absolute paths.
         # 2. CPPCheck matches paths from the command line using simple string comparisons
         #   2.1. E.g. exclusion folders
-        # source_folders+=( "$2" )
-        source_folders+=( "${args[1]}" )
         # source_folders+=( $(get_abs_filename "$2") )
+        # d=$(get_abs_filename "${args[1]}")
+        d="${args[1]}"
+        source_folders+=( "$d" )
         ;;
       -o | --out) out_folder="$2" ;;
       -c | --cppcheck) cppcheck_path="$2" ;;
@@ -117,13 +118,20 @@ done
 cppcheck_out_file="$out_folder/results.txt"
 if [ $output_xml -eq 1 ]; then
   cppcheck_out_file="$out_folder/results.xml"
-  cppcheck_parameters+=(--xml)
+  cppcheck_parameters+=( '--xml' )
 fi
 
-"$cppcheck_bin" ${cppcheck_parameters[@]} 2> $cppcheck_out_file
+"$cppcheck_bin" "${cppcheck_parameters[@]}" 2> $cppcheck_out_file
 
-[[ $output_html -gt 0 ]] && \
-"$cppcheck_html" --file="$cppcheck_out_file" --source-dir="$source_folders" --title="$html_title" --report-dir="$html_folder"
+
+cppcheck_html_parameters=( --file="$cppcheck_out_file"
+                           --title="$html_title"
+                           --report-dir="$html_folder"
+                           )
+# for s in "${source_folders[@]}"; do
+#     cppcheck_html_parameters+=( --source-dir="$s" )
+# done
+[[ $output_html -gt 0 ]] && "$cppcheck_html" "${cppcheck_html_parameters[@]}"
 
 # Count lines for Mandatory or Required rules
 error_count=`grep -i "Mandatory - \|Required - " < "$cppcheck_out_file" | wc -l`
