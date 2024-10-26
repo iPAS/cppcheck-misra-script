@@ -16,7 +16,7 @@ Bash script helper to Cppcheck on C and C++ code, with MISRA guidelines
     The executable 'cppcheck' will be in the directory.
 3. Use 'misra_check.sh' to test your source code files:
     ```bash
-    $ ./misra_check.sh <source code files | directories>
+    $ ./misra_check.sh [--source <source code files | directories>] ...
     ```
 
 
@@ -24,10 +24,11 @@ Bash script helper to Cppcheck on C and C++ code, with MISRA guidelines
 
 Just run:
 ```bash
-$ ./misra_check.sh cppcheck/samples  # For C and C++
+$ ./misra_check.sh --source cppcheck/samples  # For C and C++
 ...
-$ ./misra_check.sh examples  # For C++
+$ ./misra_check.sh --source examples  # For C++
 ...
+$ ./misra_check.sh --source cppcheck/samples --source examples  # For C++
 ```
 
 

@@ -11,21 +11,37 @@ get_abs_filename() {
 script_folder=$(get_abs_filename "$(dirname $(readlink -f $0))")
 
 # Initialize variables with defaults
-source_folder="$script_folder/.."           # -s, --source
+source_folders=()                            # -s, --source
 out_folder=""                               # -o, --out
 cppcheck_path="$script_folder/../cppcheck"  # -c, --cppcheck
 quiet=0                                     # -q, --quiet
 output_xml=0                                # -x, --xml
+output_html=0                               # --html
 clean_old_tempdir=0                         # --clean
 
 function parse_command_line() {
-   while [ $# -gt 0 ] ; do
+  while [ $# -gt 0 ] ; do
+    args=()
+    # for arg in "$@"; do echo "arg: $arg"; done; exit
+    for arg in "$@"; do args+=( "$arg" ); done;
+
     case "$1" in
-      -s | --source) source_folder="$2" ;;
+      -s | --source)
+        # Have to use absolute paths for source:
+        # 1. CPPCheck (or the shell) expands globs to absolute paths.
+        # 2. CPPCheck matches paths from the command line using simple string comparisons
+        #   2.1. E.g. exclusion folders
+        # source_folders+=( "$2" )
+        source_folders+=( "${args[1]}" )
+        # source_folders+=( $(get_abs_filename "$2") )
+        ;;
       -o | --out) out_folder="$2" ;;
       -c | --cppcheck) cppcheck_path="$2" ;;
       -q | --quiet) quiet=1 ;;
       -x | --xml) output_xml=1 ;;
+      --html) output_html=1; output_xml=1 ;;
+      --html_out) html_folder="$2" ;;
+      --html_title) html_title="$2" ;;
       --clean) clean_old_tempdir=1 ;;
       -*)
         echo "Unknown option: " $1
@@ -36,13 +52,13 @@ function parse_command_line() {
   done
 }
 
+# for arg in "$@"; do echo "arg: $arg"; done; exit
 parse_command_line "$@"
 
-# Have to use absolute paths for source:
-# 1. CPPCheck (or the shell) expands globs to absolute paths.
-# 2. CPPCheck matches paths from the command line using simple string comparisons
-#   2.1. E.g. exclusion folders
-source_folder=$(get_abs_filename "$source_folder")
+[[ ${#source_folders[@]} -eq 0 ]] && source_folders+="'$script_folder/..'"
+for s in "${source_folders[@]}"; do
+    echo "$s"
+done
 
 out_folder_prefix=misra_check-out
 [[ $clean_old_tempdir -gt 0 ]] && trash ${out_folder_prefix}.*
@@ -52,6 +68,10 @@ out_folder_prefix=misra_check-out
 
 cppcheck_bin="${cppcheck_path}/cppcheck"
 cppcheck_misra="${cppcheck_path}/addons/misra.py"
+cppcheck_html="${cppcheck_path}/htmlreport/cppcheck-htmlreport"
+
+[[ -z "$html_title"  ]] && html_title="xxx"
+[[ -z "$html_folder" ]] && html_folder="$out_folder"
 
 num_cores=`getconf _NPROCESSORS_ONLN`
 let num_cores--
@@ -80,15 +100,19 @@ cppcheck_parameters=( --inline-suppr
                       -j "$num_cores"
 
                       # All violations from included libraries (*src* folders) are ignored
-                      # --suppress="*:$source_folder/*"
+                      # --suppress="*:$source_folders/*"
 
                       # Don't parse the /src folder
-                      # -i "$source_folder"
-                      # "$source_folder/**.ino"
-                      # "$source_folder/**.c"
-                      # "$source_folder/**.cpp"
-                      "$source_folder"
+                      # -i "$source_folders"
+                      # "$source_folders/**.ino"
+                      # "$source_folders/**.c"
+                      # "$source_folders/**.cpp"
+                      # "$source_folders"
                       )
+
+for s in "${source_folders[@]}"; do
+  cppcheck_parameters+=( "$s" )  # Add source code folders
+done
 
 cppcheck_out_file="$out_folder/results.txt"
 if [ $output_xml -eq 1 ]; then
@@ -96,15 +120,10 @@ if [ $output_xml -eq 1 ]; then
   cppcheck_parameters+=(--xml)
 fi
 
-# There is no way to tell the misra add on to skip certain headers
-# libdivide adds 10+ minutes to each file so rename the folder
-# before the scan
-# mv "$source_folder"/src/libdivide "$source_folder"/src/_libdivide
-
 "$cppcheck_bin" ${cppcheck_parameters[@]} 2> $cppcheck_out_file
 
-# Restore libdivide folder name after scan
-# mv "$source_folder"/src/_libdivide "$source_folder"/src/libdivide
+[[ $output_html -gt 0 ]] && \
+"$cppcheck_html" --file="$cppcheck_out_file" --source-dir="$source_folders" --title="$html_title" --report-dir="$html_folder"
 
 # Count lines for Mandatory or Required rules
 error_count=`grep -i "Mandatory - \|Required - " < "$cppcheck_out_file" | wc -l`
