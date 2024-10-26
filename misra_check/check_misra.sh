@@ -65,7 +65,6 @@ out_folder_prefix=misra_check-out
 [[ $clean_old_tempdir -gt 0 ]] && trash ${out_folder_prefix}.*
 
 [[ -z "${out_folder}" ]] && out_folder=$(mktemp -d ${out_folder_prefix}.XXX)
-[[ ! -d "${out_folder}" ]] && echo "Cannot access the output directory: ${out_folder}" && exit 255
 
 cppcheck_bin="${cppcheck_path}/cppcheck"
 cppcheck_misra="${cppcheck_path}/addons/misra.py"
@@ -79,6 +78,7 @@ let num_cores--
 num_cores=$(nproc)
 
 mkdir -p "$out_folder"
+[[ ! -d "${out_folder}" ]] && echo "Cannot access the output directory: ${out_folder}" && exit 255
 echo '{"script": "misra.py","args": ["--rule-texts='"$script_folder"'/misra_2012_text.txt"]}' > "$out_folder/misra.json"
 
 cppcheck_parameters=( --inline-suppr
