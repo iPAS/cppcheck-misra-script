@@ -2,5 +2,5 @@
 	path = cppcheck
 	url = https://github.com/danmar/cppcheck.git
 [submodule "examples"]
-	path = examples
+	path = the examples
 	url = https://github.com/jubnzv/MISRA-Example-Suite.git
