@@ -29,6 +29,9 @@ $ ./misra_check.sh --source cppcheck/samples  # For C and C++
 $ ./misra_check.sh --source examples  # For C++
 ...
 $ ./misra_check.sh --source cppcheck/samples --source examples  # For C++
+...
+$ ./misra_check.sh --source 'the examples' --html --html-title 'Hello World' --html-out html
+...
 ```
 
 
