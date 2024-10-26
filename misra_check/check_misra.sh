@@ -41,8 +41,8 @@ function parse_command_line() {
       -q | --quiet) quiet=1 ;;
       -x | --xml) output_xml=1 ;;
       --html) output_html=1; output_xml=1 ;;
-      --html_out) html_folder="$2" ;;
-      --html_title) html_title="$2" ;;
+      --html-out) html_folder="$2" ;;
+      --html-title) html_title="$2" ;;
       --clean) clean_old_tempdir=1 ;;
       -*)
         echo "Unknown option: " $1
@@ -71,8 +71,8 @@ cppcheck_bin="${cppcheck_path}/cppcheck"
 cppcheck_misra="${cppcheck_path}/addons/misra.py"
 cppcheck_html="${cppcheck_path}/htmlreport/cppcheck-htmlreport"
 
-[[ -z "$html_title"  ]] && html_title="xxx"
-[[ -z "$html_folder" ]] && html_folder="$out_folder"
+[[ -z "$html_title"  ]] && html_title="xxx"             # --html-title
+[[ -z "$html_folder" ]] && html_folder="$out_folder"    # --html-dir
 
 num_cores=`getconf _NPROCESSORS_ONLN`
 let num_cores--
@@ -123,7 +123,7 @@ fi
 
 "$cppcheck_bin" "${cppcheck_parameters[@]}" 2> $cppcheck_out_file
 
-
+mkdir -p "$html_folder"
 cppcheck_html_parameters=( --file="$cppcheck_out_file"
                            --title="$html_title"
                            --report-dir="$html_folder"
