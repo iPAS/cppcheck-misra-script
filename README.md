@@ -7,7 +7,7 @@ Bash script helper to Cppcheck on C and C++ code, with MISRA guidelines
 
 1. Git clone this repository with '--recurse-submodules' to get the cppcheck as well.
     ```bash
-    $ git clone $$...$$ --recurse-submodules
+    $ git clone git@github.com:iPAS/cppcheck-misra-script.git --recurse-submodules
     ```
 2. Compile the cppcheck:
     ```bash
